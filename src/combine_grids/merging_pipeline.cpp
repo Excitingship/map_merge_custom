@@ -193,6 +193,13 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   nav_msgs::OccupancyGrid::Ptr result;
   internal::GridCompositor compositor;
   result = compositor.compose(imgs_warped, rois);
+  if(!transforms_.empty())
+  {
+    double x = -transforms_[0].at<double>(0,2) - rois[0].tl().x;
+    double y = -transforms_[0].at<double>(1,2) - rois[0].tl().y;
+    result->info.origin.position.x = x*grids_[0]->info.resolution;
+    result->info.origin.position.y = y*grids_[0]->info.resolution;
+  }
 
   // set correct resolution to output grid. use resolution of identity (works
   // for estimated trasforms), or any resolution (works for know_init_positions)
@@ -211,13 +218,14 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   if (result->info.resolution <= 0.f) {
     result->info.resolution = any_resolution;
   }
-
+/*
   // set grid origin to its centre
   result->info.origin.position.x =
       -(result->info.width / 2.0) * double(result->info.resolution);
   result->info.origin.position.y =
       -(result->info.height / 2.0) * double(result->info.resolution);
   result->info.origin.orientation.w = 1.0;
+*/
 /*
   // /map to /map_tl
   tf::Transform tfMap2MapTL;

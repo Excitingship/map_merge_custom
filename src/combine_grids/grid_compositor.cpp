@@ -1,7 +1,7 @@
 /*** 
  * @Author: ljz
  * @Date: 2021-12-03 19:28:38
- * @LastEditTime: 2022-01-11 23:50:43
+ * @LastEditTime: 2022-01-12 00:46:42
  * @LastEditors: ljz
  * @Description: 
  * @FilePath: /swarm_ws/src/m-explore_custom/map_merge/src/combine_grids/grid_compositor.cpp
@@ -54,7 +54,7 @@ namespace combine_grids
 namespace internal
 {
 nav_msgs::OccupancyGrid::Ptr GridCompositor::compose(
-    const std::vector<cv::Mat>& grids, const std::vector<cv::Rect>& rois)
+    const std::vector<cv::Mat>& grids, std::vector<cv::Rect>& rois)
 {
   ROS_ASSERT(grids.size() == rois.size());
 
@@ -77,10 +77,13 @@ nav_msgs::OccupancyGrid::Ptr GridCompositor::compose(
   cv::Mat result(dst_roi.size(), CV_8S, result_grid->data.data());
   std::cout << "dst_roi" << ": " << dst_roi.tl().x << " " << dst_roi.tl().y << std::endl;
   std::cout << "dst_roi size" << ": " << dst_roi.width << " " << dst_roi.height << std::endl;
+  rois.clear();
   for (size_t i = 0; i < grids.size(); ++i) {
-    std::cout << "corner" << i << ": " << corners[i].x << " " << corners[i].y << std::endl;
     // we need to compensate global offset
     cv::Rect roi = cv::Rect(corners[i] - dst_roi.tl(), sizes[i]);
+    std::cout << "roi " << i << ": " << roi.x << " " << roi.y << std::endl;
+    std::cout << "size" << ": " << roi.width << " " << roi.height << std::endl;
+    rois.push_back(roi);
     cv::Mat result_roi(result, roi);
     // reinterpret warped matrix as signed
     // we will not change this matrix, but opencv does not support const matrices

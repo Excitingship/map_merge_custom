@@ -49,7 +49,7 @@ class GridCompositor
 {
 public:
   nav_msgs::OccupancyGrid::Ptr compose(const std::vector<cv::Mat>& grids,
-                                       const std::vector<cv::Rect>& rois);
+                                       std::vector<cv::Rect>& rois);
 };
 
 }  // namespace internal
