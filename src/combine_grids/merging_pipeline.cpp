@@ -164,6 +164,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   ROS_ASSERT(images_.size() == grids_.size());
 
   if (images_.empty()) {
+    std::cout << "no map images" << std::endl;
     return nullptr;
   }
 
@@ -176,6 +177,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
 
   for (size_t i = 0; i < images_.size(); ++i) {
     if (!transforms_[i].empty() && !images_[i].empty()) {
+      std::cout << i << " transfrom and image not empty" << std::endl;
       imgs_warped.emplace_back();
       rois.emplace_back(
           warper.warp(images_[i], transforms_[i], imgs_warped.back()));
@@ -183,6 +185,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   }
 
   if (imgs_warped.empty()) {
+    std::cout << "no imgs_warped" << std::endl;
     return nullptr;
   }
 
@@ -215,7 +218,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   result->info.origin.position.y =
       -(result->info.height / 2.0) * double(result->info.resolution);
   result->info.origin.orientation.w = 1.0;
-
+/*
   // /map to /map_tl
   tf::Transform tfMap2MapTL;
   tfMap2MapTL.setOrigin(tf::Vector3(
@@ -231,7 +234,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   {
     if (!transforms_[i].empty() && !images_[i].empty()) {
       std::cout << transforms_[i] << std::endl;
-      // /map_tl to /tb3_*/map_tl
+      // /map_tl to /tb3_* /map_tl
       tf::Transform tfMapTL2RobotMapTL;
       tfMapTL2RobotMapTL.setOrigin(tf::Vector3(
         transforms_[i].at<double>(0, 2)*result->info.resolution, //0.05 is the resolution of the grid map
@@ -248,7 +251,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
       }
       tfMapTL2RobotMapTL.setRotation(qTL2RobotMapTL);
       tfBroadcaster.sendTransform(tf::StampedTransform(tfMapTL2RobotMapTL,ros::Time::now(),"/map_tl","/tb3_"+std::to_string(i)+"/map_tl"));  
-      // /tb3_*/map_tl to /tb3_*/map
+      // /tb3_* /map_tl to /tb3_* /map
       tf::Transform tfRobotMapTL2RobotMap;
       tfRobotMapTL2RobotMap.setOrigin(tf::Vector3(
         -grids_[i]->info.origin.position.x, //0.05 is the resolution of the grid map
@@ -260,6 +263,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
       tfBroadcaster.sendTransform(tf::StampedTransform(tfRobotMapTL2RobotMap,ros::Time::now(),"/tb3_"+std::to_string(i)+"/map_tl","/tb3_"+std::to_string(i)+"/map"));
     }  
   }
+  */
   return result;
 }
 

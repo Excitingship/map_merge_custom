@@ -48,6 +48,8 @@
 #include <map_msgs/OccupancyGridUpdate.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 #include <boost/thread.hpp>
 
 namespace map_merge
@@ -80,6 +82,8 @@ private:
   std::string robot_namespace_;
   std::string world_frame_;
   bool have_initial_poses_;
+
+  tf::TransformBroadcaster tfBroadcaster;
 
   // publishing
   ros::Publisher merged_map_publisher_;

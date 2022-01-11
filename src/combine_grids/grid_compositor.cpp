@@ -1,7 +1,7 @@
 /*** 
  * @Author: ljz
  * @Date: 2021-12-03 19:28:38
- * @LastEditTime: 2022-01-06 20:41:04
+ * @LastEditTime: 2022-01-11 23:50:43
  * @LastEditors: ljz
  * @Description: 
  * @FilePath: /swarm_ws/src/m-explore_custom/map_merge/src/combine_grids/grid_compositor.cpp
@@ -76,6 +76,7 @@ nav_msgs::OccupancyGrid::Ptr GridCompositor::compose(
   // create view for opencv pointing to newly allocated grid
   cv::Mat result(dst_roi.size(), CV_8S, result_grid->data.data());
   std::cout << "dst_roi" << ": " << dst_roi.tl().x << " " << dst_roi.tl().y << std::endl;
+  std::cout << "dst_roi size" << ": " << dst_roi.width << " " << dst_roi.height << std::endl;
   for (size_t i = 0; i < grids.size(); ++i) {
     std::cout << "corner" << i << ": " << corners[i].x << " " << corners[i].y << std::endl;
     // we need to compensate global offset

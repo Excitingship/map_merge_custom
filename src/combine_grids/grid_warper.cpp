@@ -1,7 +1,7 @@
 /*** 
  * @Author: ljz
  * @Date: 2021-12-03 19:28:38
- * @LastEditTime: 2022-01-06 20:33:27
+ * @LastEditTime: 2022-01-11 21:42:24
  * @LastEditors: ljz
  * @Description: 
  * @FilePath: /swarm_ws/src/m-explore_custom/map_merge/src/combine_grids/grid_warper.cpp
@@ -61,14 +61,15 @@ cv::Rect GridWarper::warp(const cv::Mat& grid, const cv::Mat& transform,
   ROS_ASSERT(transform.type() == CV_64F);
   cv::Mat H;
   invertAffineTransform(transform.rowRange(0, 2), H);
+  std::cout << "H" << std::endl;
+  std::cout << H << std::endl;
   cv::Rect roi = warpRoi(grid, H);
 
   // shift top left corner for warp affine (otherwise the image is cropped)
   H.at<double>(0, 2) -= roi.tl().x;
   H.at<double>(1, 2) -= roi.tl().y;
 
-  std::cout << "H" << std::endl;
-  std::cout << H << std::endl;
+  
 
   warpAffine(grid, warped_grid, H, roi.size(), cv::INTER_NEAREST,
              cv::BORDER_CONSTANT,
