@@ -1,6 +1,15 @@
+<!--
+ * @Author: ljz
+ * @Date: 2022-01-11 12:44:28
+ * @LastEditTime: 2022-01-12 16:34:28
+ * @LastEditors: ljz
+ * @Description: 
+ * @FilePath: /swarm_ws/src/m-explore_custom/map_merge/README.md
+ * 
+-->
 # map_merge_custom
 
-Add correct tf tree for map_merge package
+Add correct geometric relationships among merged map and maps of robots. It can work when sizes of maps changing dynamically.
 
 *It can only work in have_init_pose work mode, and map size should bigger than the area you would explore.*
 
