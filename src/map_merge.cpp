@@ -157,18 +157,18 @@ void MapMerge::mapMerging()
       for (auto& subscription : subscriptions_) {
         std::lock_guard<std::mutex> s_lock(subscription.mutex);
         grids.push_back(subscription.readonly_map);
-        
+        std::cout << "cos: " << cos(tf::getYaw(subscription.initial_pose.rotation)) << std::endl;
         geometry_msgs::Transform tfMap2RobotMapTL;
         tfMap2RobotMapTL.rotation = subscription.initial_pose.rotation;
-        tfMap2RobotMapTL.translation.x -= \
-          subscription.initial_pose.translation.x + \
+        tfMap2RobotMapTL.translation.x = \
+          subscription.initial_pose.translation.x - ( \
           cos(tf::getYaw(subscription.initial_pose.rotation))*(subscription.readonly_map->info.origin.position.x/subscription.readonly_map->info.resolution) + \
-          sin(tf::getYaw(subscription.initial_pose.rotation))*(subscription.readonly_map->info.origin.position.y/subscription.readonly_map->info.resolution);
+          sin(tf::getYaw(subscription.initial_pose.rotation))*(subscription.readonly_map->info.origin.position.y/subscription.readonly_map->info.resolution));
         std::cout << "tfMap2MapCenter.translation.x = " << tfMap2RobotMapTL.translation.x << std::endl;
-        tfMap2RobotMapTL.translation.y -= \
-          subscription.initial_pose.translation.y + \
+        tfMap2RobotMapTL.translation.y = \
+          subscription.initial_pose.translation.y - ( \
           cos(tf::getYaw(subscription.initial_pose.rotation))*(subscription.readonly_map->info.origin.position.y/subscription.readonly_map->info.resolution)- \
-          sin(tf::getYaw(subscription.initial_pose.rotation))*(subscription.readonly_map->info.origin.position.x/subscription.readonly_map->info.resolution);
+          sin(tf::getYaw(subscription.initial_pose.rotation))*(subscription.readonly_map->info.origin.position.x/subscription.readonly_map->info.resolution));
         std::cout << "tfMap2MapCenter.translation.y = " << tfMap2RobotMapTL.translation.y << std::endl;
         tfMap2RobotMapTL.translation.z = 0;
         
