@@ -193,14 +193,7 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   nav_msgs::OccupancyGrid::Ptr result;
   internal::GridCompositor compositor;
   result = compositor.compose(imgs_warped, rois);
-  if(!transforms_.empty())
-  {
-    double x = -transforms_[0].at<double>(0,2) - rois[0].tl().x;
-    double y = -transforms_[0].at<double>(1,2) - rois[0].tl().y;
-    result->info.origin.position.x = x*grids_[0]->info.resolution;
-    result->info.origin.position.y = y*grids_[0]->info.resolution;
-  }
-
+  
   // set correct resolution to output grid. use resolution of identity (works
   // for estimated trasforms), or any resolution (works for know_init_positions)
   // - in that case all resolutions should be the same.
@@ -218,6 +211,54 @@ nav_msgs::OccupancyGrid::Ptr MergingPipeline::composeGrids()
   if (result->info.resolution <= 0.f) {
     result->info.resolution = any_resolution;
   }
+
+  /********
+   * Set correct transfrom for merged map
+   * ******/
+  if(!transforms_.empty())
+  {
+    double x = -transforms_[0].at<double>(0,2) - rois[0].tl().x;
+    double y = -transforms_[0].at<double>(1,2) - rois[0].tl().y;
+    result->info.origin.position.x = x*grids_[0]->info.resolution;
+    result->info.origin.position.y = y*grids_[0]->info.resolution;
+  }
+
+  /********
+   * Set vacancy for robots' positions
+   * ******/
+  tf::TransformListener listener;
+  for(int i=0; i<3; i++)
+  {
+    tf::StampedTransform robotTF;
+    int robotPixelPosX, robotPixelPosY = 0;
+    geometry_msgs::PoseStamped robotPosBase;
+    geometry_msgs::PoseStamped robotPosMap;
+    robotPosBase.header.frame_id = "/tb3_"+std::to_string(i)+"/base_link";
+    robotPosBase.pose.orientation.w = 1;
+    listener.waitForTransform("/tb3_"+std::to_string(i)+"/base_link", "/map", ros::Time(0), ros::Duration(3.0));
+    try{
+      listener.transformPose("map", robotPosBase, robotPosMap);
+    }
+    catch(tf::TransformException &ex){
+      ROS_ERROR("%s", ex.what());
+    }
+    robotPixelPosX = int((robotPosMap.pose.position.x - result->info.origin.position.x)/result->info.resolution);
+    robotPixelPosY = int((robotPosMap.pose.position.y - result->info.origin.position.y)/result->info.resolution);
+    std::cout << "robotPixelPosX: " << robotPixelPosX << std::endl;
+    std::cout << "robotPixelPosY: " << robotPixelPosY << std::endl;
+    for(int x=-3; x<3; x++)
+    {
+      for(int y=-3; y<3; y++)
+      {
+        if((robotPixelPosY + y)<result->info.height && (robotPixelPosX + x)<result->info.width &&
+          (robotPixelPosY + y)>0 && (robotPixelPosX + x)>0)
+        {
+          result->data[(robotPixelPosY + y)*result->info.width + (robotPixelPosX + x)] = 0;
+        }
+      }
+    }
+  }
+
 /*
   // set grid origin to its centre
   result->info.origin.position.x =
